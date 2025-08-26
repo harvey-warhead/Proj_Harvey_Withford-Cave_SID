@@ -1,5 +1,9 @@
 # Exercise 1 [20 points]
 
+## Setup
+
+library(tidyverse)
+
 ## Q1
 
 X <- read.csv("vic_elect.csv") |> 
@@ -13,13 +17,13 @@ str(X)
 
 sum(X$demand)
 
-## Q4
+## Q4 <- REVISE!
 
 X |> 
   filter(month == "Jul") |> 
   mean()
 
-## Q5
+## Q5 <- REVISE!
 
 X |> 
   filter(temp < 15) |> 
