@@ -17,20 +17,24 @@ str(X)
 
 sum(X$demand)
 
-## Q4 <- REVISE!
+## Q4
 
 X |> 
-  filter(month == "Jul") |> 
-  mean()
+  filter(month == "Jul") |>
+  summarise(mean(demand))
 
-## Q5 <- REVISE!
+mean(Y[['demand']])
+
+## Q5
 
 X |> 
   filter(temp < 15) |> 
-  median()
+  summarise(median(demand))
 
 ## Q6
 
-X |>
+h_dmd <- X |>
   arrange(desc(demand)) |> 
   head(1)
+
+cat("Date of highest demand:", h_dmd$month, h_dmd$year)
