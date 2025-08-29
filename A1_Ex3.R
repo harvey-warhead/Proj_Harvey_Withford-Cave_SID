@@ -1,17 +1,28 @@
 # Exercise 3
 
-## Run function
+# Attempting a distinction/high distinction solution
+# HD: Use of a single function to call the test functions
+# D: No use of mylm
 
-mytest()
+## Run function mytest()
+
+#BEFORE RUNNING:
+#ensure files "A1_Ex3_signif.csv" and "A1_Ex3_not_signif.csv"
+#are within the project directory
+#AND all packages referenced by setup() function are installed
+
+mytest(list("A1_Ex3_signif.csv", "A1_Ex3_not_signif.csv"))
+
+#more files can be added to this list
 
 ## mytest function
 
-mytest <- function() {
+mytest <- function(csv_files) {
   setup()
-  csv_files <- list("A1_Ex3_signif.csv", "A1_Ex3_not_signif.csv")
   for(file in csv_files) {
     file_name <- read_csv(file, show_col_types = 0)
-    readline(prompt="Press [enter] to continue")
+    readline(prompt=cat("================================",
+                        "\nTEST DATA:", file, "\nPress [enter] to continue"))
     hypothesis(file_name)
     print(assumptions(file_name))
     fit1 <- fit(file_name)
@@ -70,8 +81,8 @@ fit <- function(file_name) {
   confint <- confint(model, parm = "X", level = 0.95) #  95% confidence interval
   t_val <- summary(model)$coefficients["X", "t value"]  # t statistic
   df <- model$df.residual # df
-  p_val <- summary(model)$coefficients["X", "Pr(>|t|)"] #glance(model)[["p.value"]] # P value
-  rsq <- glance(model)[["r.squared"]]
+  p_val <- glance(model)[["p.value"]] # P value
+  rsq <- glance(model)[["r.squared"]] # I want r squared values in addition to assess the strength of the correlation
 
   out <- list(
     slope_est,
