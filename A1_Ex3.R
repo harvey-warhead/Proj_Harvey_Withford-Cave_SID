@@ -1,10 +1,14 @@
 # Exercise 3
 
+## Run function
+
+mytest()
+
 ## mytest function
 
 mytest <- function() {
   setup()
-  csv_files <- list("A1_Ex3_not_signif.csv", "A1_Ex3_signif.csv")
+  csv_files <- list("A1_Ex3_signif.csv", "A1_Ex3_not_signif.csv")
   for(file in csv_files) {
     file_name <- read_csv(file, show_col_types = 0)
     readline(prompt="Press [enter] to continue")
@@ -28,7 +32,7 @@ setup <- function() {
 ## 1 Hypothesis
 
 hypothesis <- function(file_name) {
-  return(cat("Hypothesis for", deparse(substitute(file_name)), "\nH_0: β = 0 i.e. a linear model does not fit the data, against\nH_1: β ≠ 0 i.e. a linear model does fit the data\n"))
+  return(cat("HYPOTHESIS: \nH_0: β = 0 i.e. a linear model does not fit the data, against\nH_1: β ≠ 0 i.e. a linear model does fit the data"))
 }
 
 ## 2 Assumptions
@@ -42,7 +46,7 @@ assumptions <- function(file_name) {
   p1 <- file_name |> 
     ggplot(aes(x = X, y = Y)) +
     geom_point() +
-    geom_smooth(method = "lm")
+    geom_smooth(method = "lm", formula = 'y~x')
   
   p2 <- ggplot(data = results, aes(x = fitted_vals, y = residuals)) +
     geom_point() +
@@ -50,7 +54,7 @@ assumptions <- function(file_name) {
     labs(x = "fitted values")
   
   p3 <- ggplot(results, aes(x = residuals)) +
-    geom_histogram()
+    geom_histogram(bins = 30)
   
   out <- p1 / (p2 + p3)
   
@@ -67,41 +71,59 @@ fit <- function(file_name) {
   t_val <- summary(model)$coefficients["X", "t value"]  # t statistic
   df <- model$df.residual # df
   p_val <- summary(model)$coefficients["X", "Pr(>|t|)"] #glance(model)[["p.value"]] # P value
+  rsq <- glance(model)[["r.squared"]]
 
   out <- list(
     slope_est,
     confint,
     t_val,
     df,
-    p_val
+    p_val,
+    rsq
   )
   
-  cat("Slope estimate:", slope_est,
+  cat("\nREPORT:",
+      "\nSlope estimate:", slope_est,
       "\nConfidence interval (95%):", sprintf("[%.6f, %.6f]", confint[1], confint[2]),
       "\nt statistic:", t_val,
       "\nDegrees of freedom:", df,
       "\nP value:", p_val)
-  cat("\nP value:", p_val)
-  
+
   return(out)
 }
 
 ## 4 Decision
 
 decision <- function(fit1) {
-  if(p_val < 0.05) {
-    dec <- "reject"
+  if(fit1[[5]] < 0.05) {
+    return(cat("\nDECISION:\nReject null hypothesis at 5% level, as", fit1[[5]], "< 0.05."))
   }
   else {
-    dex <- "not reject"
+    return(cat("\nDECISION:\nCannot reject null hypothesis at 5% level, as", fit1[[5]], "> 0.05."))
   }
-  cat(dec)
 }
 
 ## 5 Conclusion
   
 conclusion <- function(fit1) {
-  
+  strength <- case_when(fit1[[6]] > 0.8 ~ "very strong", # indicates strength of
+                        fit1[[6]] > 0.6 ~ "strong",      # correlation based on
+                        fit1[[6]] > 0.4 ~ "medium",      # r squared values
+                        fit1[[6]] > 0.2 ~ "weak",
+                        fit1[[6]] > 0 ~ "very weak"
+  )
+  if(fit1[[5]] < 0.05) {
+    result <- "is a linear relationship between X and Y"
+  }
+  else {
+    result <- "is no relationship between X and Y"
+  }
+  return(cat("\nCONCLUSION:\nWe can endorse the above decision based on both the confidence interval",
+             sprintf("[%.6f, %.6f]", fit1[[2]][1], fit1[[2]][2]),
+             "and the P value", fit1[[5]], ".",
+             "\nThe linear correlation between X and Y is", strength,
+             "given an r squared value of", fit1[[6]], ".",
+             "\nThe data therefore suggests that there", result,
+             "with a slope estimate β = ", fit1[[1]],
+             ".\n"))
 }
-
-# Reject the null hypothesis
